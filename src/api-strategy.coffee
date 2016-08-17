@@ -11,7 +11,7 @@ class SlackStrategy extends PassportSlack
       clientID:     process.env.SLURRY_SLACK_SLACK_CLIENT_ID
       clientSecret: process.env.SLURRY_SLACK_SLACK_CLIENT_SECRET
       callbackUrl:  process.env.SLURRY_SLACK_SLACK_CALLBACK_URL
-      scope: "users:read channels:read"
+      scope: "client"
     }
 
     super options, @onAuthorization
@@ -19,7 +19,7 @@ class SlackStrategy extends PassportSlack
   onAuthorization: (accessToken, refreshToken, profile, callback) =>
     callback null, {
       id: profile.id
-      username: profile.username
+      username: profile.displayName
       secrets:
         credentials:
           secret: accessToken
