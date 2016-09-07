@@ -1,4 +1,3 @@
-http    = require 'http'
 _       = require 'lodash'
 slack = require 'slack'
 MeshbluHttp = require 'meshblu-http'
@@ -21,11 +20,12 @@ class MessageStream
       message =
         devices: ["*"]
         data: data
-        
+
       @_throttledMessage message, as: @userDeviceUuid, (error) =>
         console.error error if error?
 
-    bot.listen(token: @encrypted.secrets.credentials.secret)
+    bot.listen token: @encrypted.secrets.credentials.secret, (error) =>
+      console.error error if error?
 
   _userError: (code, message) =>
     error = new Error message
