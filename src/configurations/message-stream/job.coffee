@@ -2,6 +2,7 @@ _       = require 'lodash'
 slack = require 'slack'
 MeshbluHttp = require 'meshblu-http'
 MeshbluConfig = require 'meshblu-config'
+SlurryStream = require 'slurry-core/slurry-stream'
 
 class MessageStream
   constructor: ({@encrypted, @auth, @userDeviceUuid}) ->
@@ -11,10 +12,16 @@ class MessageStream
 
   do: ({slurry}, callback) =>
     bot = slack.rtm.client()
-    bot.destroy = bot.close
+    slurryStream = new SlurryStream
+
+    slurryStream.destroy = =>
+      bot.close()
 
     bot.started (payload) =>
-      return callback null, bot
+      bot.ws.on 'close', =>
+        slurryStream.emit 'close'
+
+      return callback null, slurryStream
 
     bot.message (data) =>
       message =
@@ -22,10 +29,10 @@ class MessageStream
         data: data
 
       @_throttledMessage message, as: @userDeviceUuid, (error) =>
-        console.error error if error?
+        slurryStream.emit 'error', error if error?
 
     bot.listen token: @encrypted.secrets.credentials.secret, (error) =>
-      console.error error if error?
+      slurryStream.emit 'error', error if error?
 
   _userError: (code, message) =>
     error = new Error message
