@@ -33,7 +33,7 @@ class PresenceChangeStream
         slurryStream.emit 'error', error if error?
 
     bot.listen token: @encrypted.secrets.credentials.secret, (error) =>
-      slurryStream.emit 'error', error if error?
+      console.error error.stack if error?
 
   _userError: (code, message) =>
     error = new Error message
